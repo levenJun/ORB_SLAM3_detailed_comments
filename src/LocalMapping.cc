@@ -409,7 +409,7 @@ void LocalMapping::ProcessNewKeyFrame()
                 if(!pMP->IsInKeyFrame(mpCurrentKeyFrame))
                 {
                     // 如果地图点不是来自当前帧的观测，为当前地图点添加观测
-                    pMP->AddObservation(mpCurrentKeyFrame, i);
+                    pMP->AddObservation(mpCurrentKeyFrame, i);      //leven:pMP对应 当前帧第i个2d特征点
                     // 获得该点的平均观测方向和观测距离范围
                     pMP->UpdateNormalAndDepth();
                     // 更新地图点的最佳描述子
@@ -503,6 +503,16 @@ void LocalMapping::MapPointCulling()
 /**
  * @brief 用当前关键帧与相邻关键帧通过三角化产生新的地图点，使得跟踪更稳
  */
+//1,当前帧cKF得到较好的前nn个共视帧:vpNeighKFs
+//2,遍历具体单个共视帧:pKF2
+    //2-1:check:如果cKF和pKF2的基线过短,跳过pKF2
+    //2-2:通过特征描述子,得到 cKF和pKF2的匹配点: vMatchedIndices
+    //2-3:遍历vMatchedIndices
+        //2-3-1:得到前后帧匹配点在cKF和pKF2具体的相机归属并取得 相机对应pose,相机光心坐标,相机参数模型:sophTcw1,Ow1,pCamera1pCamera1；sophTcw2,Ow2,pCamera1pCamera2
+        //2-3-2:计算前后帧匹配点的视差角:cosParallaxRays
+        //2-3-3:视差角度小就用前后帧三角法恢复3D点；视差角大时（离相机近）用双目恢复3D点（前后帧双目中取视差角大的双目来恢复）
+        //2-3-4:check生成3D坐标有效性:深度z>0 && 正反向重投影err小于卡方值 && 满足尺度连续性
+        //2-3-5:正式创建3D地图点
 void LocalMapping::CreateNewMapPoints()
 {
     // Retrieve neighbor keyframes in covisibility graph
@@ -510,7 +520,7 @@ void LocalMapping::CreateNewMapPoints()
     // 不同传感器下要求不一样,单目的时候需要有更多的具有较好共视关系的关键帧来建立地图
     int nn = 10;
     // For stereo inertial case 这具原注释有问题吧 应该是For Monocular case
-    // 0.4版本的这个参数为20
+    // 0.4版本的这个参数为20检查尺度连续性
     if(mbMonocular)
         nn=30;
     // Step 1：在当前关键帧的共视关键帧中找到共视程度最高的nn帧相邻关键帧
@@ -650,9 +660,7 @@ void LocalMapping::CreateNewMapPoints()
             
             // 5.2
             // 当前匹配在邻接关键帧中的特征点
-            const cv::KeyPoint &kp2 = (pKF2 -> NLeft == -1) ? pKF2->mvKeysUn[idx2]
-                                                            : (idx2 < pKF2 -> NLeft) ? pKF2 -> mvKeys[idx2]
-                                                                                     : pKF2 -> mvKeysRight[idx2 - pKF2 -> NLeft];
+            const cv::KeyPoint &kp2 = (pKF2 -> NLeft == -1) ? pKF2->mvKeysUn[idx2]检查尺度连续性idx2 - pKF2 -> NLeft];
             // mvuRight中存放着双目的深度值，如果不是双目，其值将为-1
             // mvuRight中存放着极限校准后双目特征点在右目对应的像素横坐标，如果不是基线校准的双目或者没有找到匹配点，其值将为-1（或者rgbd）
             const float kp2_ur = pKF2->mvuRight[idx2];
@@ -672,9 +680,7 @@ void LocalMapping::CreateNewMapPoints()
 
                     pCamera1 = mpCurrentKeyFrame->mpCamera2;
                     pCamera2 = pKF2->mpCamera2;
-                }
-                else if(bRight1 && !bRight2){
-                    sophTcw1 = mpCurrentKeyFrame->GetRightPose();
+                }检查尺度连续性
                     Ow1 = mpCurrentKeyFrame->GetRightCameraCenter();
 
                     sophTcw2 = pKF2->GetPose();
@@ -783,7 +789,7 @@ void LocalMapping::CreateNewMapPoints()
             }
 
             // 成功三角化
-            if(goodProj && bPointStereo)
+            if(goodProj && bPointStereo)检查尺度连续性
                 countStereoGoodProj++;
 
             if(!goodProj)

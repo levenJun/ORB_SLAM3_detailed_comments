@@ -1065,7 +1065,7 @@ int Optimizer::PoseInertialOptimizationLastFrame(Frame *pFrame, bool bRecInit)
                 {
                     // 如果是双目情况下的左目
                     if (i < Nleft)  // pair left-right
-                        // 使用未畸变校正的特征点
+                        // 使用未畸变校正的特征点       //lv:为何?
                         kpUn = pFrame->mvKeys[i];
                     // 如果是单目
                     else

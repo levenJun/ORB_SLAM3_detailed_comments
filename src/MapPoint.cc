@@ -175,7 +175,7 @@ KeyFrame* MapPoint::GetReferenceKeyFrame()
 void MapPoint::AddObservation(KeyFrame* pKF, int idx)
 {
     unique_lock<mutex> lock(mMutexFeatures);
-    tuple<int,int> indexes;
+    tuple<int,int> indexes;                 //leven:{ kf_id, {cam0_idx, cam1_idx} }
 
     if(mObservations.count(pKF)){
         indexes = mObservations[pKF];
