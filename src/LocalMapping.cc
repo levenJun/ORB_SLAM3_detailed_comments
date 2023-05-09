@@ -520,7 +520,7 @@ void LocalMapping::CreateNewMapPoints()
     // 不同传感器下要求不一样,单目的时候需要有更多的具有较好共视关系的关键帧来建立地图
     int nn = 10;
     // For stereo inertial case 这具原注释有问题吧 应该是For Monocular case
-    // 0.4版本的这个参数为20检查尺度连续性
+    // 0.4版本的这个参数为20
     if(mbMonocular)
         nn=30;
     // Step 1：在当前关键帧的共视关键帧中找到共视程度最高的nn帧相邻关键帧
@@ -660,7 +660,9 @@ void LocalMapping::CreateNewMapPoints()
             
             // 5.2
             // 当前匹配在邻接关键帧中的特征点
-            const cv::KeyPoint &kp2 = (pKF2 -> NLeft == -1) ? pKF2->mvKeysUn[idx2]检查尺度连续性idx2 - pKF2 -> NLeft];
+            const cv::KeyPoint &kp2 = (pKF2 -> NLeft == -1) ? pKF2->mvKeysUn[idx2]
+                                                            : (idx2 < pKF2 -> NLeft) ? pKF2 -> mvKeys[idx2]
+                                                                                     : pKF2 -> mvKeysRight[idx2 - pKF2 -> NLeft];
             // mvuRight中存放着双目的深度值，如果不是双目，其值将为-1
             // mvuRight中存放着极限校准后双目特征点在右目对应的像素横坐标，如果不是基线校准的双目或者没有找到匹配点，其值将为-1（或者rgbd）
             const float kp2_ur = pKF2->mvuRight[idx2];
@@ -680,7 +682,9 @@ void LocalMapping::CreateNewMapPoints()
 
                     pCamera1 = mpCurrentKeyFrame->mpCamera2;
                     pCamera2 = pKF2->mpCamera2;
-                }检查尺度连续性
+                }
+                else if(bRight1 && !bRight2){
+                    sophTcw1 = mpCurrentKeyFrame->GetRightPose();
                     Ow1 = mpCurrentKeyFrame->GetRightCameraCenter();
 
                     sophTcw2 = pKF2->GetPose();
@@ -789,7 +793,7 @@ void LocalMapping::CreateNewMapPoints()
             }
 
             // 成功三角化
-            if(goodProj && bPointStereo)检查尺度连续性
+            if(goodProj && bPointStereo)
                 countStereoGoodProj++;
 
             if(!goodProj)
@@ -1513,6 +1517,12 @@ bool LocalMapping::isFinished()
     return mbFinished;
 }
 
+//主要初始化初始帧重力方向,尺度s,ba,bg,所有KF的速度
+//初始化:
+//      重力mRwg:
+//      尺度s:1.0
+//      ba,bg:置为0
+//      KF的速度:dp/dt硬算
 /** 
  * @brief imu初始化
  * @param priorG 陀螺仪偏置的信息矩阵系数，主动设置时一般bInit为true，也就是只优化最后一帧的偏置，这个数会作为计算信息矩阵时使用
@@ -1559,7 +1569,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
         return;
 
     mFirstTs=vpKF.front()->mTimeStamp;
-    if(mpCurrentKeyFrame->mTimeStamp-mFirstTs<minTime)
+    if(mpCurrentKeyFrame->mTimeStamp-mFirstTs<minTime)  //leven:要求用于初始化的KF列表时间段至少为minTime(1秒)
         return;
 
     // 正在做IMU的初始化，在tracking里面使用，如果为true，暂不添加关键帧
@@ -1626,7 +1636,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
         Eigen::Vector3f vzg = v*ang/nv;
         // 获得重力坐标系到世界坐标系的旋转矩阵的初值
         Rwg = Sophus::SO3f::exp(vzg).matrix();
-        mRwg = Rwg.cast<double>();
+        mRwg = Rwg.cast<double>();  //特别注意,这里是左乘重力方向
         mTinit = mpCurrentKeyFrame->mTimeStamp-mFirstTs;
     }
     else
@@ -1662,7 +1672,7 @@ void LocalMapping::InitializeIMU(float priorG, float priorA, bool bFIBA)
         // 尺度变化超过设定值，或者非单目时（无论带不带imu，但这个函数只在带imu时才执行，所以这个可以理解为双目imu）
         if ((fabs(mScale - 1.f) > 0.00001) || !mbMonocular) {
             // 4.1 恢复重力方向与尺度信息
-            Sophus::SE3f Twg(mRwg.cast<float>().transpose(), Eigen::Vector3f::Zero());
+            Sophus::SE3f Twg(mRwg.cast<float>().transpose(), Eigen::Vector3f::Zero());  //leven:左乘重力方向转为右乘重力方向
             mpAtlas->GetCurrentMap()->ApplyScaledRotation(Twg, mScale, true);
             // 4.2 更新普通帧的位姿，主要是当前帧与上一帧
             mpTracker->UpdateFrameIMU(mScale, vpKF[0]->GetImuBias(), mpCurrentKeyFrame);

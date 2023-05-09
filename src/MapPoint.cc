@@ -551,6 +551,7 @@ tuple<int,int> MapPoint::GetIndexInKeyFrame(KeyFrame *pKF)
 
 /**
  * @brief return (mObservations.count(pKF));
+ *        true:  当前MP的观测列表中已经包含了 pKF
  */
 bool MapPoint::IsInKeyFrame(KeyFrame *pKF)
 {

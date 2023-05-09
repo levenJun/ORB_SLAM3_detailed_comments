@@ -297,7 +297,7 @@ void Map::ApplyScaledRotation(const Sophus::SE3f &T, const float s, const bool b
 
         // |  Ryc     s*Ryw*twc + tyw  |
         // |   0           1           |
-        Sophus::SE3f Tyc = Tyw * Twc;
+        Sophus::SE3f Tyc = Tyw * Twc;               //普通KF的pose对齐到重力方向
         Sophus::SE3f Tcy = Tyc.inverse();
         pKF->SetPose(Tcy);
         // 更新关键帧速度
