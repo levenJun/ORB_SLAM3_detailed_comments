@@ -209,6 +209,12 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     mpFrameDrawer = new FrameDrawer(mpAtlas);
     mpMapDrawer = new MapDrawer(mpAtlas, strSettingsFile, settings_);
 
+    if(settings_){
+        cout << "System settings_ 存在!" << endl;
+    }else{
+        cout << "System settings_ 不存在!" << endl;
+    }
+
     //Initialize the Tracking thread
     //(it will live in the main thread of execution, the one that called this constructor)
     // 创建跟踪线程（主线程）,不会立刻开启,会在对图像和imu预处理后在main主线程种执行

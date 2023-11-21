@@ -181,14 +181,14 @@ cv::Mat FrameDrawer::DrawFrame(float imageScale)
                 // This is a match to a MapPoint in the map
                 if(vbMap[i])
                 {
-                    cv::rectangle(im,pt1,pt2,standardColor);
-                    cv::circle(im,point,2,standardColor,-1);
+                    cv::rectangle(im,pt1,pt2,cv::Scalar(255,0,0));
+                    cv::circle(im,point,2,cv::Scalar(0,0,255),-1);
                     mnTracked++;
                 }
                 else // This is match to a "visual odometry" MapPoint created in the last frame
                 {
-                    cv::rectangle(im,pt1,pt2,odometryColor);
-                    cv::circle(im,point,2,odometryColor,-1);
+                    cv::rectangle(im,pt1,pt2, cv::Scalar(0,255,0));
+                    cv::circle(im,point,2,cv::Scalar(255,0,0),-1);
                     mnTrackedVO++;
                 }
             }
@@ -306,13 +306,15 @@ cv::Mat FrameDrawer::DrawRightFrame(float imageScale)
                 // This is a match to a MapPoint in the map
                 if(vbMap[i + Nleft])
                 {
-                    cv::rectangle(im,pt1,pt2,cv::Scalar(0,255,0));
-                    cv::circle(im,point,2,cv::Scalar(0,255,0),-1);
+
+                    cv::rectangle(im,pt1,pt2,cv::Scalar(255,0,0));
+                    cv::circle(im,point,2,cv::Scalar(0,0,255),-1);
                     mnTracked++;
                 }
                 else // This is match to a "visual odometry" MapPoint created in the last frame
                 {
-                    cv::rectangle(im,pt1,pt2,cv::Scalar(255,0,0));
+
+                    cv::rectangle(im,pt1,pt2, cv::Scalar(0,255,0));
                     cv::circle(im,point,2,cv::Scalar(255,0,0),-1);
                     mnTrackedVO++;
                 }

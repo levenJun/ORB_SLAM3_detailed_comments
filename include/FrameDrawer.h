@@ -60,7 +60,7 @@ protected:
     cv::Mat mIm, mImRight;
     int N;
     vector<cv::KeyPoint> mvCurrentKeys,mvCurrentKeysRight;
-    vector<bool> mvbMap, mvbVO;
+    vector<bool> mvbMap, mvbVO;     //mvbMap[true]表示此特征有效且obv大于0, mvbVO[true]表示此特征有效且obv<=0
     bool mbOnlyTracking;
     int mnTracked, mnTrackedVO;
     vector<cv::KeyPoint> mvIniKeys;

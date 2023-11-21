@@ -597,6 +597,15 @@ void Tracking::newParameterLoader(Settings *settings) {
         mTlr = settings->Tlr();
 
         mpFrameDrawer->both = true;
+        
+    }
+
+    cout << "mSensor=" << mSensor << endl;
+
+    if(mpFrameDrawer->both){
+        cout << "mpFrameDrawer->both 有效!" << endl;
+    }else{
+        cout << "mpFrameDrawer->both 无效!" << endl;
     }
 
     // 读取双目
