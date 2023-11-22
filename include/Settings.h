@@ -174,7 +174,7 @@ namespace ORB_SLAM3 {
         bool bNeedToRectify_;
         bool bNeedToResize1_, bNeedToResize2_;
 
-        Sophus::SE3f Tlr_;
+        Sophus::SE3f Tlr_;  //右乘: 从l到r
         float thDepth_;
         float bf_, b_;
 

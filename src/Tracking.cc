@@ -74,9 +74,11 @@ Tracking::Tracking(System *pSys, ORBVocabulary* pVoc, FrameDrawer *pFrameDrawer,
     // Load camera parameters from settings file
     // Step 1 从配置文件中加载相机参数
     if(settings){
+        std::cout << "Tracking settings exists, do newParameterLoader" << std::endl;
         newParameterLoader(settings);
     }
     else{
+        std::cout << "Tracking settings doesn`t exist, do ParseCamParamFile" << std::endl;
         cv::FileStorage fSettings(strSettingPath, cv::FileStorage::READ);
 
         bool b_parse_cam = ParseCamParamFile(fSettings);
@@ -1188,6 +1190,7 @@ bool Tracking::ParseCamParamFile(cv::FileStorage &fSettings)
             {
                 mbf *= mImageScale;
             }
+            cout << "Tracking mbf=" << mbf << ", mImageScale=" << mImageScale << endl;
         }
         else
         {
@@ -4757,6 +4760,8 @@ void Tracking::ChangeCalibration(const string &strSettingPath)
     DistCoef.copyTo(mDistCoef);
 
     mbf = fSettings["Camera.bf"];
+
+    std::cout << "Tracking ChangeCalibration, mbf=" << mbf << std::endl;
 
     Frame::mbInitialComputations = true;
 }

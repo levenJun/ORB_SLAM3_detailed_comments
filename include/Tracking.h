@@ -133,7 +133,8 @@ public:
 
     // Input sensor
     int mSensor;
-
+    float mbf;
+    
     // Current Frame
     Frame mCurrentFrame;
     Frame mLastFrame;
@@ -290,7 +291,7 @@ protected:
     cv::Mat mK;
     Eigen::Matrix3f mK_;
     cv::Mat mDistCoef;
-    float mbf;
+    // float mbf;
     float mImageScale;
 
     float mImuFreq;

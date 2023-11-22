@@ -322,6 +322,16 @@ void Viewer::Run()
 
         if(both){
             cv::Mat imRight = mpFrameDrawer->DrawRightFrame(trackedImageScale);
+
+            if(true){
+                //将图像顺时针转90度再显示
+                cv::transpose(im, im);
+                cv::flip(im, im, 1);
+
+                cv::transpose(imRight, imRight);
+                cv::flip(imRight, imRight, 1);
+            }
+
             cv::hconcat(im,imRight,toShow);
         }
         else{
