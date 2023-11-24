@@ -181,7 +181,7 @@ public:
     long unsigned int mnLastFrameSeen;
 
     // Variables used by local mapping
-    long unsigned int mnBALocalForKF;
+    long unsigned int mnBALocalForKF;           //在LBA等,要作优化前, add为待优化KF,防止重复添加
     long unsigned int mnFuseCandidateForKF;
 
     // Variables used by loop closing

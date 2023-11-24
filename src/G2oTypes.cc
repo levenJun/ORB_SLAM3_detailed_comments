@@ -601,6 +601,8 @@ void EdgeInertial::computeError()
     const VertexPose* VP2 = static_cast<const VertexPose*>(_vertices[4]);           //位姿Tj
     const VertexVelocity* VV2 = static_cast<const VertexVelocity*>(_vertices[5]);   //速度vj
     const IMU::Bias b1(VA1->estimate()[0],VA1->estimate()[1],VA1->estimate()[2],VG1->estimate()[0],VG1->estimate()[1],VG1->estimate()[2]);
+
+    //计算新的dbg和dba, 然后更新dR,dV,dP
     const Eigen::Matrix3d dR = mpInt->GetDeltaRotation(b1).cast<double>();
     const Eigen::Vector3d dV = mpInt->GetDeltaVelocity(b1).cast<double>();
     const Eigen::Vector3d dP = mpInt->GetDeltaPosition(b1).cast<double>();

@@ -283,12 +283,13 @@ void Preintegrated::IntegrateNewMeasurement(const Eigen::Vector3f &acceleration,
     A.block<3, 3>(3, 0) = -dR * dt * Wacc;
     A.block<3, 3>(6, 0) = -0.5f * dR * dt * dt * Wacc;
     A.block<3, 3>(6, 3) = Eigen::DiagonalMatrix<float, 3>(dt, dt, dt);
-    B.block<3, 3>(3, 3) = dR * dt;
-    B.block<3, 3>(6, 3) = 0.5f * dR * dt * dt;
+    B.block<3, 3>(3, 3) =  dR * dt;
+    B.block<3, 3>(6, 3) =  0.5f * dR * dt * dt;
 
     // Update position and velocity jacobians wrt bias correction
     // 因为随着时间推移，不可能每次都重新计算雅克比矩阵，所以需要做J(k+1) = j(k) + (~)这类事，分解方式与AB矩阵相同
     // 论文作者对forster论文公式的基础上做了变形，然后递归更新，参见 https://github.com/UZ-SLAMLab/ORB_SLAM3/issues/212
+    //这是delta_PV对delta_ba和delta_bg的的雅可比递推式
     JPa = JPa + JVa * dt - 0.5f * dR * dt * dt;
     JPg = JPg + JVg * dt - 0.5f * dR * dt * dt * Wacc * JRg;
     JVa = JVa - dR * dt;
@@ -303,14 +304,17 @@ void Preintegrated::IntegrateNewMeasurement(const Eigen::Vector3f &acceleration,
     // Compute rotation parts of matrices A and B
     // 补充AB矩阵
     A.block<3, 3>(0, 0) = dRi.deltaR.transpose();
-    B.block<3, 3>(0, 0) = dRi.rightJ * dt;
+    B.block<3, 3>(0, 0) =  dRi.rightJ * dt;
 
     // 小量delta初始为0，更新后通常也为0，故省略了小量的更新
     // Update covariance
     // Step 3.更新协方差，frost经典预积分论文的第63个公式，推导了噪声（ηa, ηg）对dR dV dP 的影响
+    //1)这是delta_qvp块对应的cov递推式------但是缺了delta_bg和delta_ba的子构成!
     C.block<9, 9>(0, 0) = A * C.block<9, 9>(0, 0) * A.transpose() + B * Nga * B.transpose();  // B矩阵为9*6矩阵 Nga 6*6对角矩阵，3个陀螺仪噪声的平方，3个加速度计噪声的平方
     // 这一部分最开始是0矩阵，随着积分次数增加，每次都加上随机游走，偏置的信息矩阵
+    //2)这是delta_bg和delta_ba块对应的cov递推式-----刚好对应得上!
     C.block<6, 6>(9, 9) += NgaWalk;
+    //3)delta_qvp和delta_bga的互关的cov直接就为0?没有作递推?
 
     // Update rotation jacobian wrt bias correction
     // 计算偏置的雅克比矩阵，r对bg的导数，∂ΔRij/∂bg = (ΔRjj-1) * ∂ΔRij-1/∂bg - Jr(j-1)*t

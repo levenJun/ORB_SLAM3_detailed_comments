@@ -325,7 +325,7 @@ public:
     long unsigned int mnFuseTargetForKF;
 
     // Variables used by the local mapping
-    long unsigned int mnBALocalForKF;
+    long unsigned int mnBALocalForKF;   //在LBA等,要作优化前, add为待优化KF, 和curKF关联起来 防止重复添加
     long unsigned int mnBAFixedForKF;
 
     //Number of optimizations by BA(amount of iterations in BA)
