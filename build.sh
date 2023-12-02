@@ -34,7 +34,8 @@ cd ..
 
 cd Thirdparty/Pangolin
 echo "Configuring and building Thirdparty/Pangolin ..."
-./install_Pangolin.sh
+# ./install_Pangolin.sh
+echo "请自己手动安装"
 cd ../..
 
 echo "Configuring and building ORB_SLAM3 ..."
