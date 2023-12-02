@@ -32,6 +32,11 @@ cd Vocabulary
 tar -xf ORBvoc.txt.tar.gz
 cd ..
 
+cd Thirdparty/Pangolin
+echo "Configuring and building Thirdparty/Pangolin ..."
+./install_Pangolin.sh
+cd ../..
+
 echo "Configuring and building ORB_SLAM3 ..."
 
 mkdir build
